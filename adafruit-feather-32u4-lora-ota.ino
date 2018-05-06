@@ -40,8 +40,7 @@
 // note: keys are in the keys.h
 // This EUI must be in little-endian format, so least-significant-byte
 // first. When copying an EUI from ttnctl output, this means to reverse
-// the bytes. For TTN issued EUIs the last bytes should be 0xD5, 0xB3,
-// 0x70.
+// the bytes. For TTN issued EUIs the last bytes should be 0xD5, 0xB3, 0x70.
 // static const u1_t PROGMEM APPEUI[8]= { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 void os_getArtEui (u1_t* buf) { memcpy_P(buf, APPEUI, 8);}
 
@@ -70,6 +69,8 @@ const lmic_pinmap lmic_pins = {
    .rst = 4, 
    .dio = {7, 6, LMIC_UNUSED_PIN}, 
 };
+
+#define VBATPIN A9
 
 void onEvent (ev_t ev) {
     Serial.print(os_getTime());
@@ -174,6 +175,14 @@ void do_send(osjob_t* j){
         LMIC_setTxData2(1, mydata, sizeof(mydata)-1, 0);
         Serial.println(F("Packet queued"));
     }
+
+    // get battery voltage
+    float measuredvbat = analogRead(VBATPIN);
+    measuredvbat *= 2;
+    measuredvbat *= 3.3;
+    measuredvbat /= 1024;
+    Serial.print(F("VBat: "));Serial.println(measuredvbat);
+    
     // Next TX is scheduled after TX_COMPLETE event.
 }
 
